@@ -83,6 +83,9 @@ canvas {
   max-width: 90px !important;
   max-height: 90px !important;
   object-fit: contain;
+
+  border: 2px dashed red !important;
+  background: yellow !important;
 }
 
 
@@ -90,7 +93,6 @@ canvas {
   font-size: clamp(10px, 2.5vw, 12px);
   text-align: center;
   margin: 20px 0 5px;
-  background: rgba(255, 255, 0, 0.5); /* Временный фон для отладки */
   position: relative;
   z-index: 3;
 }
@@ -204,25 +206,14 @@ canvas {
     font-size: clamp(9px, 2.5vw, 10px);
   }
   #qrcode {
-    display: flex;
-    justify-content: center;
-    align-items: center;
     width: 50px;
     height: 50px;
-    margin: 5px auto 10px;
-    padding: 3px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    background: white;
-    overflow: hidden;
   }
-
   #qrcode canvas {
-    width: auto !important;
-    height: auto !important;
+    width: 40px !important;
+    height: 40px !important;
     max-width: 40px !important;
     max-height: 40px !important;
-    object-fit: contain;
   }
 }
 
