@@ -4,6 +4,9 @@
   <meta charset="utf-8">
   <title>Museum Artifact</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <script src="https://cdn.babylonjs.com/babylon.js"></script>
   <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -39,6 +42,7 @@ canvas {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
   box-sizing: border-box;
   transition: all 0.3s ease;
+  min-height: 200px; /* Добавлено для предотвращения сжатия */
 }
 
 .info-panel h2 {
@@ -57,19 +61,24 @@ canvas {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: clamp(80px, 25vw, 120px);
-  height: clamp(80px, 25vw, 120px);
+  width: 120px;
+  height: 120px;
   background: white;
   padding: 5px;
   border: 1px solid #ccc;
   border-radius: 4px;
-  margin: 10px auto 8px;
+  margin: 10px auto 15px;
+}
+
+#qrcode canvas {
+  width: 100% !important;
+  height: 100% !important;
 }
 
 .qr-text {
   font-size: clamp(10px, 2.5vw, 12px);
   text-align: center;
-  margin: 8px 0 0;
+  margin: 15px 0 5px;
 }
 
 .qr-text a {
@@ -111,6 +120,7 @@ canvas {
   .info-panel {
     max-width: 80%;
     padding: 10px;
+    min-height: 180px;
   }
   .info-panel h2 {
     font-size: clamp(16px, 4vw, 18px);
@@ -119,8 +129,8 @@ canvas {
     font-size: clamp(11px, 3vw, 12px);
   }
   #qrcode {
-    width: clamp(70px, 20vw, 100px);
-    height: clamp(70px, 20vw, 100px);
+    width: 100px;
+    height: 100px;
   }
 }
 
@@ -129,6 +139,7 @@ canvas {
     max-width: 90%;
     padding: 8px;
     background: rgba(255, 255, 255, 0.95);
+    min-height: 160px;
   }
   .info-panel h2 {
     font-size: clamp(14px, 3.5vw, 16px);
@@ -138,8 +149,8 @@ canvas {
     line-height: 1.3;
   }
   #qrcode {
-    width: clamp(60px, 18vw, 90px);
-    height: clamp(60px, 18vw, 90px);
+    width: 80px;
+    height: 80px;
   }
 }
 
@@ -147,6 +158,7 @@ canvas {
   .info-panel {
     max-width: 95%;
     padding: 6px;
+    min-height: 140px;
   }
   .info-panel h2 {
     font-size: clamp(12px, 3.2vw, 14px);
@@ -155,8 +167,8 @@ canvas {
     font-size: clamp(9px, 2.5vw, 10px);
   }
   #qrcode {
-    width: clamp(50px, 16vw, 80px);
-    height: clamp(50px, 16vw, 80px);
+    width: 70px;
+    height: 70px;
   }
 }
   </style>
@@ -169,6 +181,7 @@ canvas {
     <p id="artifact-period"><strong>Период:</strong> 20 век</p>
     <p id="artifact-material"><strong>Материал:</strong> Керамика</p>
     <p id="artifact-description"><strong>Описание:</strong> Витебская обл., Витебский р-н, г/п Сураж. Частная коллекция Ковалек И.А.</p>
+    <div id="enforce"></div>
     <div id="qrcode"></div>
     <p class="qr-text">
       Отсканируйте для просмотра
@@ -199,8 +212,11 @@ function generateQRCode(artifactId) {
   qrContainer.innerHTML = ''; // Очищаем контейнер перед созданием нового QR-кода
   const baseUrl = `${window.location.origin}/pages/artifact.html`;
   const artifactUrl = `${baseUrl}?artifactId=${artifactId}`;
-  const panelWidth = document.querySelector('.info-panel').offsetWidth;
-  const qrSize = Math.min(Math.max(panelWidth * 0.25, 50), 120); // 25% от ширины панели, минимум 50px, максимум 120px
+  const width = window.innerWidth;
+  let qrSize = 120;
+  if (width <= 768) qrSize = 100;
+  if (width <= 480) qrSize = 80;
+  if (width <= 360) qrSize = 70;
 
   // Создаем QR-код
   new QRCode(qrContainer, {
@@ -260,8 +276,7 @@ function configureCameraAndModel(camera, model) {
     scale = 7;
   } else if (width >= 768 && width <= 1024) {
     radius = 15;
-    lowerRadiusLimit = 10;
-    upperRadiusLimit = 20;
+    lowerRadiusLimit = 1, 20;
     scale = 7;
   } else {
     radius = 10;
@@ -315,7 +330,7 @@ async function loadModel(modelPath) {
         clearTimeout(window.autoRotateTimeout);
         window.autoRotateTimeout = setTimeout(() => {
           isAutoRotating = true;
-        }, 1000); 
+        }, 1000);
       }
     });
     canvas.addEventListener('touchstart', () => {
@@ -325,7 +340,7 @@ async function loadModel(modelPath) {
       clearTimeout(window.autoRotateTimeout);
       window.autoRotateTimeout = setTimeout(() => {
         isAutoRotating = true;
-      }, 2000); // Уменьшено с 6000 до 2000 мс
+      }, 1000);
     });
     scene.registerBeforeRender(() => {
       if (isAutoRotating && result.meshes) {
