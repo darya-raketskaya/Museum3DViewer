@@ -64,7 +64,7 @@ canvas {
   border: 1px solid #ccc;
   border-radius: 4px;
   margin: 10px auto 0;
-  background: lightblue;
+  /* background: lightblue; */
 }
 
 #qrcode canvas {
@@ -248,6 +248,7 @@ function generateQRCode(artifactId) {
   setTimeout(() => {
     const qrCanvas = qrContainer.querySelector('canvas');
     if (qrCanvas) {
+      qrCanvas.setAttribute('style', `width: ${qrSize}px !important; height: ${qrSize}px !important; display: block;`);
       const downloadLink = document.getElementById('download-qr');
       downloadLink.href = qrCanvas.toDataURL('image/png');
     }
