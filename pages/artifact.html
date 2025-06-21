@@ -243,6 +243,12 @@ function generateQRCode(artifactId) {
     correctLevel: QRCode.CorrectLevel.H
   });
 
+  const qrCanvas = qrContainer.querySelector('canvas');
+if (qrCanvas) {
+  qrCanvas.style.width = `${qrSize}px`;
+  qrCanvas.style.height = `${qrSize}px`;
+}
+
   // Обновляем ссылку для скачивания QR-кода
   setTimeout(() => {
     const qrCanvas = qrContainer.querySelector('canvas');
