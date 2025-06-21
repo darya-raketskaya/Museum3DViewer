@@ -57,19 +57,19 @@ canvas {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: clamp(80px, 25vw, 120px);
-  height: clamp(80px, 25vw, 120px);
+  width: 120px;
+  height: 120px;
   background: white;
   padding: 5px;
   border: 1px solid #ccc;
   border-radius: 4px;
-  margin: 10px auto 8px;
+  margin: 10, auto 12px;
 }
 
 .qr-text {
   font-size: clamp(10px, 2.5vw, 12px);
   text-align: center;
-  margin: 8px 0 0;
+  margin: 12px 0 0;
 }
 
 .qr-text a {
@@ -119,8 +119,8 @@ canvas {
     font-size: clamp(11px, 3vw, 12px);
   }
   #qrcode {
-    width: clamp(70px, 20vw, 100px);
-    height: clamp(70px, 20vw, 100px);
+    width: 100px;
+    height: 100px;
   }
 }
 
@@ -138,8 +138,8 @@ canvas {
     line-height: 1.3;
   }
   #qrcode {
-    width: clamp(60px, 18vw, 90px);
-    height: clamp(60px, 18vw, 90px);
+    width: 80px;
+    height: 80px;
   }
 }
 
@@ -155,8 +155,8 @@ canvas {
     font-size: clamp(9px, 2.5vw, 10px);
   }
   #qrcode {
-    width: clamp(50px, 16vw, 80px);
-    height: clamp(50px, 16vw, 80px);
+    width: 70px;
+    height: 70px;
   }
 }
   </style>
@@ -199,8 +199,11 @@ function generateQRCode(artifactId) {
   qrContainer.innerHTML = ''; // Очищаем контейнер перед созданием нового QR-кода
   const baseUrl = `${window.location.origin}/pages/artifact.html`;
   const artifactUrl = `${baseUrl}?artifactId=${artifactId}`;
-  const panelWidth = document.querySelector('.info-panel').offsetWidth;
-  const qrSize = Math.min(Math.max(panelWidth * 0.25, 50), 120); // 25% от ширины панели, минимум 50px, максимум 120px
+  const width = window.innerWidth;
+  let qrSize = 120;
+  if (width <= 768) qrSize = 100;
+  if (width <= 480) qrSize = 80;
+  if (width <= 360) qrSize = 70;
 
   // Создаем QR-код
   new QRCode(qrContainer, {
@@ -315,7 +318,7 @@ async function loadModel(modelPath) {
         clearTimeout(window.autoRotateTimeout);
         window.autoRotateTimeout = setTimeout(() => {
           isAutoRotating = true;
-        }, 2000); // Уменьшено с 6000 до 2000 мс
+        }, 1000);
       }
     });
     canvas.addEventListener('touchstart', () => {
@@ -325,7 +328,7 @@ async function loadModel(modelPath) {
       clearTimeout(window.autoRotateTimeout);
       window.autoRotateTimeout = setTimeout(() => {
         isAutoRotating = true;
-      }, 2000); // Уменьшено с 6000 до 2000 мс
+      }, 1000);
     });
     scene.registerBeforeRender(() => {
       if (isAutoRotating && result.meshes) {
