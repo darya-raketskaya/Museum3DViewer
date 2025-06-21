@@ -207,7 +207,8 @@ function generateQRCode(artifactId) {
   // const baseUrl = 'http://127.0.0.1:5500/pages/artifact.html';
   const baseUrl = `${window.location.origin}/pages/artifact.html`;
   const artifactUrl = `${baseUrl}?artifactId=${artifactId}`;
-  const width = window.innerWidth;
+  //const width = window.innerWidth;
+  const width = document.getElementById('qrcode').parentElement.offsetWidth;
   let qrSize;
 
   // Определяем размер QR-кода в зависимости от ширины экрана
