@@ -204,14 +204,25 @@ canvas {
     font-size: clamp(9px, 2.5vw, 10px);
   }
   #qrcode {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     width: 50px;
     height: 50px;
+    margin: 5px auto 10px;
+    padding: 3px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: white;
+    overflow: hidden;
   }
+
   #qrcode canvas {
-    width: 40px !important;
-    height: 40px !important;
+    width: auto !important;
+    height: auto !important;
     max-width: 40px !important;
     max-height: 40px !important;
+    object-fit: contain;
   }
 }
 
