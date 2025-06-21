@@ -57,19 +57,19 @@ canvas {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: clamp(80px, 30%, 150px);
-  height: clamp(80px, 30%, 150px);
+  width: clamp(80px, 25vw, 120px);
+  height: clamp(80px, 25vw, 120px);
   background: white;
   padding: 5px;
   border: 1px solid #ccc;
   border-radius: 4px;
-  margin: 10px auto 0;
+  margin: 10px auto 8px;
 }
 
 .qr-text {
   font-size: clamp(10px, 2.5vw, 12px);
   text-align: center;
-  margin: 5px 0 0;
+  margin: 8px 0 0;
 }
 
 .qr-text a {
@@ -118,6 +118,10 @@ canvas {
   .info-panel p {
     font-size: clamp(11px, 3vw, 12px);
   }
+  #qrcode {
+    width: clamp(70px, 20vw, 100px);
+    height: clamp(70px, 20vw, 100px);
+  }
 }
 
 @media screen and (max-width: 480px) {
@@ -133,6 +137,10 @@ canvas {
     font-size: clamp(10px, 2.8vw, 11px);
     line-height: 1.3;
   }
+  #qrcode {
+    width: clamp(60px, 18vw, 90px);
+    height: clamp(60px, 18vw, 90px);
+  }
 }
 
 @media screen and (max-width: 360px) {
@@ -145,6 +153,10 @@ canvas {
   }
   .info-panel p {
     font-size: clamp(9px, 2.5vw, 10px);
+  }
+  #qrcode {
+    width: clamp(50px, 16vw, 80px);
+    height: clamp(50px, 16vw, 80px);
   }
 }
   </style>
@@ -188,7 +200,7 @@ function generateQRCode(artifactId) {
   const baseUrl = `${window.location.origin}/pages/artifact.html`;
   const artifactUrl = `${baseUrl}?artifactId=${artifactId}`;
   const panelWidth = document.querySelector('.info-panel').offsetWidth;
-  const qrSize = Math.min(Math.max(panelWidth * 0.3, 80), 150); // 30% от ширины панели, минимум 80px, максимум 150px
+  const qrSize = Math.min(Math.max(panelWidth * 0.25, 50), 120); // 25% от ширины панели, минимум 50px, максимум 120px
 
   // Создаем QR-код
   new QRCode(qrContainer, {
@@ -303,7 +315,7 @@ async function loadModel(modelPath) {
         clearTimeout(window.autoRotateTimeout);
         window.autoRotateTimeout = setTimeout(() => {
           isAutoRotating = true;
-        }, 6000);
+        }, 2000); // Уменьшено с 6000 до 2000 мс
       }
     });
     canvas.addEventListener('touchstart', () => {
@@ -313,7 +325,7 @@ async function loadModel(modelPath) {
       clearTimeout(window.autoRotateTimeout);
       window.autoRotateTimeout = setTimeout(() => {
         isAutoRotating = true;
-      }, 6000);
+      }, 2000); // Уменьшено с 6000 до 2000 мс
     });
     scene.registerBeforeRender(() => {
       if (isAutoRotating && result.meshes) {
