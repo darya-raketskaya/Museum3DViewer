@@ -63,7 +63,9 @@ canvas {
 }
 
 #qrcode {
-  display: block;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   margin: 10px auto 20px;
   width: 100px;
   height: 100px;
@@ -75,12 +77,11 @@ canvas {
   position: relative;
 }
 
-
 #qrcode canvas {
+  width: auto !important;
+  height: auto !important;
   max-width: 90px !important;
   max-height: 90px !important;
-  width: 90px !important;
-  height: 90px !important;
   object-fit: contain;
 }
 
