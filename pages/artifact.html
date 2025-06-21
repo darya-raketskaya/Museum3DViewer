@@ -278,28 +278,6 @@ function generateQRCode(artifactId) {
 }
 
 
-  // Принудительное ограничение размера canvas после генерации с дополнительной проверкой
-  setTimeout(() => {
-    const qrCanvas = qrContainer.querySelector('canvas');
-    if (qrCanvas) {
-      qrCanvas.style.maxWidth = `${qrSize}px`;
-      qrCanvas.style.maxHeight = `${qrSize}px`;
-      qrCanvas.style.width = `${qrSize}px`;
-      qrCanvas.style.height = `${qrSize}px`;
-      // Повторная корректировка через 100ms
-      setTimeout(() => {
-        qrCanvas.style.maxWidth = `${qrSize}px`;
-        qrCanvas.style.maxHeight = `${qrSize}px`;
-        qrCanvas.style.width = `${qrSize}px`;
-        qrCanvas.style.height = `${qrSize}px`;
-        console.log(`QR Canvas size set to ${qrSize}x${qrSize}px, actual width: ${qrCanvas.offsetWidth}px, actual height: ${qrCanvas.offsetHeight}px`);
-      }, 100);
-      const downloadLink = document.getElementById('download-qr');
-      downloadLink.href = qrCanvas.toDataURL('image/png');
-    }
-  }, 500); // Задержка 500ms
-}
-
 const canvas = document.getElementById('renderCanvas');
 const engine = new BABYLON.Engine(canvas, true, {
   preserveDrawingBuffer: true,
