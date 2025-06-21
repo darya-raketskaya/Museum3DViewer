@@ -43,6 +43,7 @@ canvas {
   box-sizing: border-box;
   transition: all 0.3s ease;
   min-height: 220px;
+  z-index: 1;
 }
 
 .info-panel h2 {
@@ -66,14 +67,21 @@ canvas {
   border: 1px solid #ccc;
   border-radius: 4px;
   margin: 10px auto 20px;
-  overflow: hidden; /* Предотвращает растяжение содержимого */
+  overflow: hidden;
 }
 
-#qrcode canvas {
+#qrcode .qr-canvas-container {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+#qrcode .qr-canvas-container canvas {
   max-width: 100% !important;
   max-height: 100% !important;
   width: 100% !important;
   height: 100% !important;
+  object-fit: contain;
 }
 
 .qr-text {
@@ -81,6 +89,8 @@ canvas {
   text-align: center;
   margin: 20px 0 5px;
   background: rgba(255, 255, 0, 0.5); /* Временный фон для отладки */
+  position: relative;
+  z-index: 2;
 }
 
 .qr-text a {
@@ -183,7 +193,9 @@ canvas {
     <p id="artifact-period"><strong>Период:</strong> 20 век</p>
     <p id="artifact-material"><strong>Материал:</strong> Керамика</p>
     <p id="artifact-description"><strong>Описание:</strong> Витебская обл., Витебский р-н, г/п Сураж. Частная коллекция Ковалек И.А.</p>
-    <div id="qrcode"></div>
+    <div id="qrcode">
+      <div class="qr-canvas-container"></div>
+    </div>
     <p class="qr-text">
       Отсканируйте для просмотра
       <a id="download-qr" href="#" download="qrcode.png">Скачать QR-код</a>
@@ -209,7 +221,7 @@ function showError(message) {
 }
 
 function generateQRCode(artifactId) {
-  const qrContainer = document.getElementById('qrcode');
+  const qrContainer = document.querySelector('#qrcode .qr-canvas-container');
   qrContainer.innerHTML = ''; // Очищаем контейнер перед созданием нового QR-кода
   const baseUrl = `${window.location.origin}/pages/artifact.html`;
   const artifactUrl = `${baseUrl}?artifactId=${artifactId}`;
@@ -237,11 +249,18 @@ function generateQRCode(artifactId) {
       qrCanvas.style.maxHeight = `${qrSize}px`;
       qrCanvas.style.width = `${qrSize}px`;
       qrCanvas.style.height = `${qrSize}px`;
-      console.log(`QR Canvas size set to ${qrSize}x${qrSize}px, actual width: ${qrCanvas.offsetWidth}px`);
+      // Повторная проверка и корректировка через 100ms
+      setTimeout(() => {
+        qrCanvas.style.maxWidth = `${qrSize}px`;
+        qrCanvas.style.maxHeight = `${qrSize}px`;
+        qrCanvas.style.width = `${qrSize}px`;
+        qrCanvas.style.height = `${qrSize}px`;
+        console.log(`QR Canvas size set to ${qrSize}x${qrSize}px, actual width: ${qrCanvas.offsetWidth}px`);
+      }, 100);
       const downloadLink = document.getElementById('download-qr');
       downloadLink.href = qrCanvas.toDataURL('image/png');
     }
-  }, 200); // Увеличена задержка до 200ms для учета асинхронного рендеринга
+  }, 300); // Увеличена задержка до 300ms
 }
 
 const canvas = document.getElementById('renderCanvas');
