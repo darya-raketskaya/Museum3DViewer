@@ -180,7 +180,7 @@ canvas {
   <button class="toggle-btn" onclick="toggleInfoPanel()">Скрыть информацию</button>
   <div class="info-panel">
     <h2 id="artifact-title">Изразец угловой, рельефный, "шоколадный", глазурованный</h2>
-    <p id="artifact-period"><strong>Период:</strong> 20 век</p>
+    <p id="artifact-period"><strong>Период:</strong> Конец 19 века - начало 20 века</p>
     <p id="artifact-material"><strong>Материал:</strong> Керамика</p>
     <p id="artifact-description"><strong>Описание:</strong> Витебская обл., Витебский р-н, г/п Сураж. Частная коллекция Ковалек И.А.</p>
     <div id="qrcode"></div>
@@ -243,16 +243,12 @@ function generateQRCode(artifactId) {
     correctLevel: QRCode.CorrectLevel.H
   });
 
-  const qrCanvas = qrContainer.querySelector('canvas');
-if (qrCanvas) {
-  qrCanvas.style.width = `${qrSize}px`;
-  qrCanvas.style.height = `${qrSize}px`;
-}
-
   // Обновляем ссылку для скачивания QR-кода
   setTimeout(() => {
     const qrCanvas = qrContainer.querySelector('canvas');
     if (qrCanvas) {
+        qrCanvas.style.width = `${qrSize}px`;
+  qrCanvas.style.height = `${qrSize}px`;
       const downloadLink = document.getElementById('download-qr');
       downloadLink.href = qrCanvas.toDataURL('image/png');
     }
