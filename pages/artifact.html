@@ -58,9 +58,7 @@ canvas {
 }
 
 #qrcode {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  display: block;
   width: 100px;
   height: 100px;
   background: white;
@@ -68,6 +66,7 @@ canvas {
   border: 1px solid #ccc;
   border-radius: 4px;
   margin: 10px auto 20px;
+  overflow: hidden; /* Предотвращает растяжение содержимого */
 }
 
 #qrcode canvas {
@@ -81,8 +80,6 @@ canvas {
   font-size: clamp(10px, 2.5vw, 12px);
   text-align: center;
   margin: 20px 0 5px;
-  position: relative;
-  z-index: 1;
   background: rgba(255, 255, 0, 0.5); /* Временный фон для отладки */
 }
 
@@ -232,7 +229,7 @@ function generateQRCode(artifactId) {
     correctLevel: QRCode.CorrectLevel.H
   });
 
-  // Принудительное ограничение размера canvas после генерации
+  // Принудительное ограничение размера canvas после генерации с дополнительной проверкой
   setTimeout(() => {
     const qrCanvas = qrContainer.querySelector('canvas');
     if (qrCanvas) {
@@ -240,10 +237,11 @@ function generateQRCode(artifactId) {
       qrCanvas.style.maxHeight = `${qrSize}px`;
       qrCanvas.style.width = `${qrSize}px`;
       qrCanvas.style.height = `${qrSize}px`;
+      console.log(`QR Canvas size set to ${qrSize}x${qrSize}px, actual width: ${qrCanvas.offsetWidth}px`);
       const downloadLink = document.getElementById('download-qr');
       downloadLink.href = qrCanvas.toDataURL('image/png');
     }
-  }, 100);
+  }, 200); // Увеличена задержка до 200ms для учета асинхронного рендеринга
 }
 
 const canvas = document.getElementById('renderCanvas');
