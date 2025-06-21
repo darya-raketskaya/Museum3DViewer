@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Museum Artifact</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+  <script src="https://cdn.babylonjs.com/babylon.js"></script>
+  <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f0f0f0;
+  overflow: hidden;
+}
+
+canvas {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  touch-action: none;
+}
+
+.info-panel {
+  position: relative;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 15px;
+  max-width: 400px;
+  width: 100%;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+}
+
+.info-panel h2 {
+  margin: 0 0 10px;
+  font-size: clamp(18px, 5vw, 20px);
+  line-height: 1.2;
+}
+
+.info-panel p {
+  font-size: clamp(12px, 3.5vw, 14px);
+  line-height: 1.4;
+  margin: 5px 0;
+}
+
+#qrcode {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: clamp(120px, 25vw, 150px);
+  height: clamp(120px, 25vw, 150px);
+  background: white;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin: 10px auto 0;
+}
+
+.qr-text {
+  font-size: clamp(10px, 2.5vw, 12px);
+  text-align: center;
+  margin: 5px 0 0;
+}
+
+.qr-text a {
+  display: block;
+  color: #0078d4;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.qr-text a:hover {
+  color: #005a9e;
+  text-decoration: underline;
+}
+
+.info-wrapper {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  max-width: 400px;
+  width: 100%;
+}
+
+.toggle-btn {
+  background-color: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 10px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+@media screen and (max-width: 768px) {
+  .info-panel {
+    max-width: 80%;
+    padding: 10px;
+  }
+  .info-panel h2 {
+    font-size: clamp(16px, 4vw, 18px);
+  }
+  .info-panel p {
+    font-size: clamp(11px, 3vw, 12px);
+  }
+  #qrcode {
+    width: clamp(100px, 25vw, 120px);
+    height: clamp(100px, 25vw, 120px);
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .info-panel {
+    max-width: 90%;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.95);
+  }
+  .info-panel h2 {
+    font-size: clamp(14px, 3.5vw, 16px);
+  }
+  .info-panel p {
+    font-size: clamp(10px, 2.8vw, 11px);
+    line-height: 1.3;
+  }
+  #qrcode {
+    width: clamp(80px, 16vw, 100px);
+    height: clamp(80px, 16vw, 100px);
+    margin: 8px auto 0;
+  }
+  .qr-text {
+    font-size: clamp(9px, 2.2vw, 10px);
+  }
+}
+
+@media screen and (max-width: 360px) {
+  .info-panel {
+    max-width: 95%;
+    padding: 6px;
+  }
+  .info-panel h2 {
+    font-size: clamp(12px, 3.2vw, 14px);
+  }
+  .info-panel p {
+    font-size: clamp(9px, 2.5vw, 10px);
+  }
+  #qrcode {
+    width: clamp(70px, 15vw, 90px);
+    height: clamp(70px, 15vw, 90px);
+  }
+  .qr-text {
+    font-size: clamp(8px, 2vw, 9px);
+  }
+}
+  </style>
+</head>
+<body>
+<div class="info-wrapper">
+  <button class="toggle-btn" onclick="toggleInfoPanel()">Скрыть информацию</button>
+  <div class="info-panel">
+    <h2 id="artifact-title">Изразец угловой, рельефный, "шоколадный", глазурованный</h2>
+    <p id="artifact-period"><strong>Период:</strong> 20 век</p>
+    <p id="artifact-material"><strong>Материал:</strong> Керамика</p>
+    <p id="artifact-description"><strong>Описание:</strong> Витебская обл., Витебский р-н, г/п Сураж. Частная коллекция Ковалек И.А.</p>
+    <div id="qrcode"></div>
+    <p class="qr-text">
+      Отсканируйте для просмотра
+      <a id="download-qr" href="#" download="qrcode.png">Скачать QR-код</a>
+    </p>
+  </div>
+</div>
+<canvas id="renderCanvas"></canvas>
+
+<script>
+function showError(message) {
+  const errorDiv = document.createElement('div');
+  errorDiv.style.position = 'absolute';
+  errorDiv.style.top = '50%';
+  errorDiv.style.left = '50%';
+  errorDiv.style.transform = 'translate(-50%, -50%)';
+  errorDiv.style.background = 'rgba(255, 0, 0, 0.8)';
+  errorDiv.style.color = 'white';
+  errorDiv.style.padding = '10px';
+  errorDiv.style.borderRadius = '5px';
+  errorDiv.textContent = message;
+  document.body.appendChild(errorDiv);
+  setTimeout(() => errorDiv.remove(), 3000);
+}
+
+function generateQRCode(artifactId) {
+  const qrContainer = document.getElementById('qrcode');
+  qrContainer.innerHTML = ''; // Очищаем контейнер перед созданием нового QR-кода
+  // const baseUrl = 'http://127.0.0.1:5500/pages/artifact.html';
+  const baseUrl = `${window.location.origin}/pages/artifact.html`;
+  const artifactUrl = `${baseUrl}?artifactId=${artifactId}`;
+  const width = window.innerWidth;
+  let qrSize;
+
+  // Определяем размер QR-кода в зависимости от ширины экрана
+  if (width <= 360) {
+    qrSize = clamp(50, 14 * width / 100, 60);
+  } else if (width <= 480) {
+    qrSize = clamp(60, 15 * width / 100, 70);
+  } else if (width <= 768) {
+    qrSize = clamp(80, 20 * width / 100, 90);
+  } else {
+    qrSize = clamp(100, 25 * width / 100, 120);
+  }
+
+  function clamp(min, val, max) {
+    return Math.min(Math.max(val, min), max);
+  }
+
+  // Создаем QR-код
+  new QRCode(qrContainer, {
+    text: artifactUrl,
+    width: qrSize,
+    height: qrSize,
+    colorDark: '#000000',
+    colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.H
+  });
+
+  // Обновляем ссылку для скачивания QR-кода
+  setTimeout(() => {
+    const qrCanvas = qrContainer.querySelector('canvas');
+    if (qrCanvas) {
+      const downloadLink = document.getElementById('download-qr');
+      downloadLink.href = qrCanvas.toDataURL('image/png');
+    }
+  }, 100);
+}
+
+const canvas = document.getElementById('renderCanvas');
+const engine = new BABYLON.Engine(canvas, true, {
+  preserveDrawingBuffer: true,
+  stencil: true,
+  alpha: true,
+  antialias: true,
+  adaptToDeviceRatio: true
+});
+const scene = new BABYLON.Scene(engine);
+scene.clearColor = new BABYLON.Color4(0, 0, 0, 0);
+scene.useGeometryIds = true;
+const camera = new BABYLON.ArcRotateCamera('camera', Math.PI / 2, Math.PI / 2, 21, BABYLON.Vector3.Zero(), scene);
+camera.attachControl(canvas, true, true, true);
+const ambientLight = new BABYLON.HemisphericLight('ambientLight', new BABYLON.Vector3(0, 1, 0), scene);
+ambientLight.intensity = 0.8;
+ambientLight.groundColor = new BABYLON.Color3(0.8, 0.8, 0.8);
+const directionalLight1 = new BABYLON.DirectionalLight('directionalLight1', new BABYLON.Vector3(0, -1, -1), scene);
+directionalLight1.position = new BABYLON.Vector3(2, 5, 2);
+directionalLight1.intensity = 0.7;
+const directionalLight2 = new BABYLON.DirectionalLight('directionalLight2', new BABYLON.Vector3(0, 1, 1), scene);
+directionalLight2.position = new BABYLON.Vector3(-2, -5, -2);
+directionalLight2.intensity = 0.5;
+const pointLight = new BABYLON.PointLight('pointLight', new BABYLON.Vector3(0, 0, 5), scene);
+pointLight.intensity = 0.3;
+directionalLight1.shadowEnabled = true;
+const shadowGenerator = new BABYLON.ShadowGenerator(1024, directionalLight1);
+shadowGenerator.useBlurExponentialShadowMap = true;
+
+function configureCameraAndModel(camera, model) {
+  const width = window.innerWidth;
+  let radius, lowerRadiusLimit, upperRadiusLimit, scale;
+  if (width > 1024) {
+    radius = 0;
+    lowerRadiusLimit = 15;
+    upperRadiusLimit = 30;
+    scale = 7;
+  } else if (width >= 768 && width <= 1024) {
+    radius = 15;
+    lowerRadiusLimit = 10;
+    upperRadiusLimit = 20;
+    scale = 7;
+  } else {
+    radius = 10;
+    lowerRadiusLimit = 5;
+    upperRadiusLimit = 15;
+    scale = 4;
+  }
+  camera.radius = radius;
+  camera.lowerRadiusLimit = lowerRadiusLimit;
+  camera.upperRadiusLimit = upperRadiusLimit;
+  camera.wheelPrecision = width <= 768 ? 100 : 50;
+  camera.panningSensibility = width <= 768 ? 2000 : 1000;
+  if (model) {
+    model.scaling = new BABYLON.Vector3(scale, scale, scale);
+  }
+}
+
+function updateInfoPanel(artifact) {
+  document.getElementById('artifact-title').textContent = artifact.title;
+  document.getElementById('artifact-period').innerHTML = `<strong>Период:</strong> ${artifact.period}`;
+  document.getElementById('artifact-material').innerHTML = `<strong>Материал:</strong> ${artifact.material}`;
+  document.getElementById('artifact-description').innerHTML = `<strong>Описание:</strong> ${artifact.description}`;
+}
+
+let currentModel = null;
+async function loadModel(modelPath) {
+  console.log(`Загрузка модели: ${modelPath}`);
+  if (currentModel) {
+    currentModel.dispose();
+    currentModel = null;
+  }
+  try {
+    const result = await BABYLON.SceneLoader.ImportMeshAsync('', '', modelPath, scene);
+    currentModel = result.meshes[0];
+    if (!currentModel) {
+      console.error('Модель не найдена в result.meshes[0]');
+      return;
+    }
+    currentModel.position = new BABYLON.Vector3(0, -2, 0);
+    shadowGenerator.addShadowCaster(currentModel);
+    configureCameraAndModel(camera, currentModel);
+    let isAutoRotating = true;
+    const rotationSpeed = 0.003;
+    canvas.addEventListener('mousedown', (event) => {
+      if (event.button === 0) {
+        isAutoRotating = false;
+      }
+    });
+    canvas.addEventListener('mouseup', (event) => {
+      if (event.button === 0) {
+        clearTimeout(window.autoRotateTimeout);
+        window.autoRotateTimeout = setTimeout(() => {
+          isAutoRotating = true;
+        }, 6000);
+      }
+    });
+    canvas.addEventListener('touchstart', () => {
+      isAutoRotating = false;
+    });
+    canvas.addEventListener('touchend', () => {
+      clearTimeout(window.autoRotateTimeout);
+      window.autoRotateTimeout = setTimeout(() => {
+        isAutoRotating = true;
+      }, 6000);
+    });
+    scene.registerBeforeRender(() => {
+      if (isAutoRotating && result.meshes) {
+        result.meshes.forEach((mesh) => {
+          mesh.rotate(BABYLON.Vector3.Up(), rotationSpeed * scene.getAnimationRatio());
+        });
+      }
+    });
+  } catch (error) {
+    console.error('Ошибка загрузки модели:', error);
+  }
+}
+
+async function loadArtifact(artifactId) {
+  console.log(`Загрузка артефакта с ID: ${artifactId}`);
+  try {
+    const response = await fetch('/artifacts.json');
+    const artifacts = await response.json();
+    const artifact = artifacts.find(a => a.id === artifactId);
+    if (!artifact) {
+      console.error('Артефакт не найден');
+      return;
+    }
+    updateInfoPanel(artifact);
+    await loadModel(artifact.modelPath);
+    generateQRCode(artifactId);
+  } catch (error) {
+    console.error('Ошибка загрузки данных:', error);
+    showError('Не удалось загрузить данные артефакта');
+  }
+}
+function toggleInfoPanel() {
+  const panel = document.querySelector('.info-panel');
+  const btn = document.querySelector('.toggle-btn');
+  const isHidden = panel.style.display === 'none';
+  panel.style.display = isHidden ? 'block' : 'none';
+  btn.textContent = isHidden ? 'Скрыть информацию' : 'Показать информацию';
+}
+// Добавляем обработчик события resize для обновления QR-кода
+window.addEventListener('resize', () => {
+  engine.resize();
+  configureCameraAndModel(camera, currentModel);
+  // Пересоздаем QR-код с новым размером
+  const urlParams = new URLSearchParams(window.location.search);
+  const artifactId = urlParams.get('artifactId') || 1;
+  generateQRCode(artifactId);
+});
+
+const urlParams = new URLSearchParams(window.location.search);
+let initialArtifactId = parseInt(urlParams.get('artifactId'));
+if (isNaN(initialArtifactId)) initialArtifactId = 1;
+loadArtifact(initialArtifactId);
+
+engine.runRenderLoop(() => {
+  scene.render();
+});
+
+
+</script>
+</body>
+</html>
