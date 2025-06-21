@@ -349,6 +349,13 @@ async function loadModel(modelPath) {
     configureCameraAndModel(camera, currentModel);
     let isAutoRotating = true;
     const rotationSpeed = 0.003;
+
+// Функция для проверки, попал ли клик/касание по модели
+    function isModelPicked(event) {
+      const pickResult = scene.pick(scene.pointerX, scene.pointerY);
+      return pickResult.hit && pickResult.pickedMesh && result.meshes.includes(pickResult.pickedMesh);
+    }
+
     canvas.addEventListener('mousedown', (event) => {
       if (event.button === 0) {
         isAutoRotating = false;
@@ -362,9 +369,16 @@ async function loadModel(modelPath) {
         }, 6000);
       }
     });
-    canvas.addEventListener('touchstart', () => {
-      isAutoRotating = false;
+
+    // Обработчик для сенсорных устройств
+    canvas.addEventListener('touchstart', (event) => {
+      if (isModelPicked(event.touches[0])) {
+        isAutoRotating = false;
+      }
     });
+    // canvas.addEventListener('touchstart', () => {
+    //   isAutoRotating = false;
+    // });
     canvas.addEventListener('touchend', () => {
       clearTimeout(window.autoRotateTimeout);
       window.autoRotateTimeout = setTimeout(() => {
