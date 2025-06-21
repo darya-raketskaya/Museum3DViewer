@@ -43,19 +43,23 @@ canvas {
   box-sizing: border-box;
   transition: all 0.3s ease;
   min-height: 220px;
-  z-index: 1;
+  z-index: 2;
 }
 
 .info-panel h2 {
   margin: 0 0 10px;
   font-size: clamp(18px, 5vw, 20px);
   line-height: 1.2;
+  position: relative;
+  z-index: 3;
 }
 
 .info-panel p {
   font-size: clamp(12px, 3.5vw, 14px);
   line-height: 1.4;
   margin: 5px 0;
+  position: relative;
+  z-index: 3;
 }
 
 #qrcode {
@@ -68,19 +72,23 @@ canvas {
   border-radius: 4px;
   margin: 10px auto 20px;
   overflow: hidden;
+  position: relative;
+  z-index: 1;
 }
 
 #qrcode .qr-canvas-container {
-  width: 100%;
-  height: 100%;
+  display: inline-block;
+  width: 90px;
+  height: 90px;
   overflow: hidden;
+  vertical-align: middle;
 }
 
 #qrcode .qr-canvas-container canvas {
-  max-width: 100% !important;
-  max-height: 100% !important;
-  width: 100% !important;
-  height: 100% !important;
+  max-width: 90px !important;
+  max-height: 90px !important;
+  width: 90px !important;
+  height: 90px !important;
   object-fit: contain;
 }
 
@@ -90,7 +98,7 @@ canvas {
   margin: 20px 0 5px;
   background: rgba(255, 255, 0, 0.5); /* Временный фон для отладки */
   position: relative;
-  z-index: 2;
+  z-index: 3;
 }
 
 .qr-text a {
@@ -144,6 +152,16 @@ canvas {
     width: 90px;
     height: 90px;
   }
+  #qrcode .qr-canvas-container {
+    width: 80px;
+    height: 80px;
+  }
+  #qrcode .qr-canvas-container canvas {
+    max-width: 80px !important;
+    max-height: 80px !important;
+    width: 80px !important;
+    height: 80px !important;
+  }
 }
 
 @media screen and (max-width: 480px) {
@@ -164,6 +182,16 @@ canvas {
     width: 60px;
     height: 60px;
   }
+  #qrcode .qr-canvas-container {
+    width: 50px;
+    height: 50px;
+  }
+  #qrcode .qr-canvas-container canvas {
+    max-width: 50px !important;
+    max-height: 50px !important;
+    width: 50px !important;
+    height: 50px !important;
+  }
 }
 
 @media screen and (max-width: 360px) {
@@ -181,6 +209,16 @@ canvas {
   #qrcode {
     width: 50px;
     height: 50px;
+  }
+  #qrcode .qr-canvas-container {
+    width: 40px;
+    height: 40px;
+  }
+  #qrcode .qr-canvas-container canvas {
+    max-width: 40px !important;
+    max-height: 40px !important;
+    width: 40px !important;
+    height: 40px !important;
   }
 }
   </style>
@@ -226,10 +264,10 @@ function generateQRCode(artifactId) {
   const baseUrl = `${window.location.origin}/pages/artifact.html`;
   const artifactUrl = `${baseUrl}?artifactId=${artifactId}`;
   const width = window.innerWidth;
-  let qrSize = 100;
-  if (width <= 768) qrSize = 90;
-  if (width <= 480) qrSize = 60;
-  if (width <= 360) qrSize = 50;
+  let qrSize = 90; // Уменьшено базовое значение для точного контроля
+  if (width <= 768) qrSize = 80;
+  if (width <= 480) qrSize = 50;
+  if (width <= 360) qrSize = 40;
 
   // Создаем QR-код
   new QRCode(qrContainer, {
@@ -249,18 +287,18 @@ function generateQRCode(artifactId) {
       qrCanvas.style.maxHeight = `${qrSize}px`;
       qrCanvas.style.width = `${qrSize}px`;
       qrCanvas.style.height = `${qrSize}px`;
-      // Повторная проверка и корректировка через 100ms
+      // Повторная корректировка через 100ms
       setTimeout(() => {
         qrCanvas.style.maxWidth = `${qrSize}px`;
         qrCanvas.style.maxHeight = `${qrSize}px`;
         qrCanvas.style.width = `${qrSize}px`;
         qrCanvas.style.height = `${qrSize}px`;
-        console.log(`QR Canvas size set to ${qrSize}x${qrSize}px, actual width: ${qrCanvas.offsetWidth}px`);
+        console.log(`QR Canvas size set to ${qrSize}x${qrSize}px, actual width: ${qrCanvas.offsetWidth}px, actual height: ${qrCanvas.offsetHeight}px`);
       }, 100);
       const downloadLink = document.getElementById('download-qr');
       downloadLink.href = qrCanvas.toDataURL('image/png');
     }
-  }, 300); // Увеличена задержка до 300ms
+  }, 500); // Увеличена задержка до 500ms
 }
 
 const canvas = document.getElementById('renderCanvas');
