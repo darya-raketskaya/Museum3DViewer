@@ -63,7 +63,9 @@ canvas {
 }
 
 #qrcode {
-  display: block;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   width: 100px;
   height: 100px;
   background: white;
@@ -72,27 +74,16 @@ canvas {
   border-radius: 4px;
   margin: 10px auto 20px;
   overflow: hidden;
-  position: relative;
-  z-index: 1;
 }
 
-#qrcode .qr-canvas-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 90px;
-  height: 90px;
-  overflow: hidden;
-  vertical-align: middle;
-}
-
-#qrcode .qr-canvas-container canvas {
+#qrcode canvas {
   max-width: 90px !important;
   max-height: 90px !important;
   width: 90px !important;
   height: 90px !important;
   object-fit: contain;
 }
+
 
 .qr-text {
   font-size: clamp(10px, 2.5vw, 12px);
@@ -154,15 +145,11 @@ canvas {
     width: 90px;
     height: 90px;
   }
-  #qrcode .qr-canvas-container {
-    width: 80px;
-    height: 80px;
-  }
-  #qrcode .qr-canvas-container canvas {
-    max-width: 80px !important;
-    max-height: 80px !important;
+  #qrcode canvas {
     width: 80px !important;
     height: 80px !important;
+    max-width: 80px !important;
+    max-height: 80px !important;
   }
 }
 
@@ -184,15 +171,11 @@ canvas {
     width: 60px;
     height: 60px;
   }
-  #qrcode .qr-canvas-container {
-    width: 50px;
-    height: 50px;
-  }
-  #qrcode .qr-canvas-container canvas {
-    max-width: 50px !important;
-    max-height: 50px !important;
+  #qrcode canvas {
     width: 50px !important;
     height: 50px !important;
+    max-width: 50px !important;
+    max-height: 50px !important;
   }
 }
 
@@ -212,17 +195,14 @@ canvas {
     width: 50px;
     height: 50px;
   }
-  #qrcode .qr-canvas-container {
-    width: 40px;
-    height: 40px;
-  }
-  #qrcode .qr-canvas-container canvas {
-    max-width: 40px !important;
-    max-height: 40px !important;
+  #qrcode canvas {
     width: 40px !important;
     height: 40px !important;
+    max-width: 40px !important;
+    max-height: 40px !important;
   }
 }
+
   </style>
 </head>
 <body>
@@ -234,7 +214,7 @@ canvas {
     <p id="artifact-material"><strong>Материал:</strong> Керамика</p>
     <p id="artifact-description"><strong>Описание:</strong> Витебская обл., Витебский р-н, г/п Сураж. Частная коллекция Ковалек И.А.</p>
     <div id="qrcode">
-      <div class="qr-canvas-container"></div>
+      <!-- <div class="qr-canvas-container"></div> -->
     </div>
     <p class="qr-text">
       Отсканируйте для просмотра
@@ -261,17 +241,18 @@ function showError(message) {
 }
 
 function generateQRCode(artifactId) {
-  const qrContainer = document.querySelector('#qrcode .qr-canvas-container');
-  qrContainer.innerHTML = ''; // Очищаем контейнер перед созданием нового QR-кода
+  const qrContainer = document.getElementById('qrcode');
+  qrContainer.innerHTML = ''; // очищаем перед созданием
+
   const baseUrl = `${window.location.origin}/pages/artifact.html`;
   const artifactUrl = `${baseUrl}?artifactId=${artifactId}`;
+
   const width = window.innerWidth;
-  let qrSize = 90; // Уменьшено базовое значение для точного контроля
+  let qrSize = 90;
   if (width <= 768) qrSize = 80;
   if (width <= 480) qrSize = 50;
   if (width <= 360) qrSize = 40;
 
-  // Создаем QR-код
   new QRCode(qrContainer, {
     text: artifactUrl,
     width: qrSize,
@@ -280,6 +261,22 @@ function generateQRCode(artifactId) {
     colorLight: '#ffffff',
     correctLevel: QRCode.CorrectLevel.H
   });
+
+  // принудительно задаём размер canvas
+  setTimeout(() => {
+    const qrCanvas = qrContainer.querySelector('canvas');
+    if (qrCanvas) {
+      qrCanvas.style.width = `${qrSize}px`;
+      qrCanvas.style.height = `${qrSize}px`;
+      qrCanvas.style.maxWidth = `${qrSize}px`;
+      qrCanvas.style.maxHeight = `${qrSize}px`;
+
+      const downloadLink = document.getElementById('download-qr');
+      downloadLink.href = qrCanvas.toDataURL('image/png');
+    }
+  }, 500);
+}
+
 
   // Принудительное ограничение размера canvas после генерации с дополнительной проверкой
   setTimeout(() => {
