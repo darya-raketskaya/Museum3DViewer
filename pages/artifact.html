@@ -58,22 +58,24 @@ canvas {
   justify-content: center;
   align-items: center;
   width: clamp(120px, 25vw, 150px);
-  height: clamp(120px, 25vw, 150px); 
+  height: clamp(120px, 25vw, 150px);
   background: white;
   padding: 5px;
   border: 1px solid #ccc;
   border-radius: 4px;
   margin: 10px auto 0;
-  /* background: lightblue; */
+  overflow: hidden; /* Предотвращаем выход содержимого за пределы контейнера */
+  position: relative; /* Устанавливаем относительное позиционирование */
 }
 
-/* #qrcode canvas {
+#qrcode canvas,
+#qrcode img {
   width: 100% !important;
-  height: auto !important;
-  max-height: 100% !important;
-  object-fit: contain;
-} */
-
+  height: 100% !important;
+  object-fit: contain; /* Гарантируем, что изображение не искажается */
+  display: block;
+  margin: 0 auto;
+}
 
 .qr-text {
   font-size: clamp(10px, 2.5vw, 12px);
@@ -97,7 +99,7 @@ canvas {
   position: absolute;
   top: 10px;
   left: 10px;
-  z-index: 1;
+  z-index: 10; /* Увеличиваем z-index, чтобы быть выше canvas */
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -212,19 +214,18 @@ function showError(message) {
 
 function generateQRCode(artifactId) {
   const qrContainer = document.getElementById('qrcode');
-  // Очищаем контейнер перед созданием нового QR-кода
-  // qrContainer.innerHTML = ''; ы
-   while (qrContainer.firstChild) {
+  
+  // Полностью очищаем контейнер
+  while (qrContainer.firstChild) {
     qrContainer.removeChild(qrContainer.firstChild);
   }
-  // const baseUrl = 'http://127.0.0.1:5500/pages/artifact.html';
+
   const baseUrl = `${window.location.origin}/pages/artifact.html`;
   const artifactUrl = `${baseUrl}?artifactId=${artifactId}`;
-  //const width = window.innerWidth;
   const width = document.getElementById('qrcode').parentElement.offsetWidth;
   let qrSize;
 
-  // Определяем размер QR-кода в зависимости от ширины экрана
+  // Определяем размер QR-кода
   if (width <= 360) {
     qrSize = clamp(50, 14 * width / 100, 60);
   } else if (width <= 480) {
@@ -249,15 +250,20 @@ function generateQRCode(artifactId) {
     correctLevel: QRCode.CorrectLevel.H
   });
 
-  // Обновляем ссылку для скачивания QR-кода
-  setTimeout(() => {
+  // Используем MutationObserver для отслеживания добавления QR-кода
+  const observer = new MutationObserver(() => {
     const qrCanvas = qrContainer.querySelector('canvas');
-    if (qrCanvas) {
-      qrCanvas.setAttribute('style', `width: ${qrSize}px !important; height: ${qrSize}px !important; display: block;`);
+    const qrImage = qrContainer.querySelector('img'); // На случай, если библиотека создает <img>
+    if (qrCanvas || qrImage) {
+      const qrElement = qrCanvas || qrImage;
+      qrElement.setAttribute('style', `width: ${qrSize}px !important; height: ${qrSize}px !important; display: block; margin: 0 auto;`);
       const downloadLink = document.getElementById('download-qr');
-      downloadLink.href = qrCanvas.toDataURL('image/png');
+      downloadLink.href = qrElement.toDataURL ? qrElement.toDataURL('image/png') : qrElement.src;
+      observer.disconnect(); // Отключаем observer после обработки
     }
-  }, 100);
+  });
+
+  observer.observe(qrContainer, { childList: true });
 }
 
 const canvas = document.getElementById('renderCanvas');
@@ -363,7 +369,7 @@ async function loadModel(modelPath) {
       clearTimeout(window.autoRotateTimeout);
       window.autoRotateTimeout = setTimeout(() => {
         isAutoRotating = true;
-      }, 6000);
+      }, 1000);
     });
     scene.registerBeforeRender(() => {
       if (isAutoRotating && result.meshes) {
@@ -403,13 +409,16 @@ function toggleInfoPanel() {
   btn.textContent = isHidden ? 'Скрыть информацию' : 'Показать информацию';
 }
 // Добавляем обработчик события resize для обновления QR-кода
+let resizeTimeout;
 window.addEventListener('resize', () => {
-  engine.resize();
-  configureCameraAndModel(camera, currentModel);
-  // Пересоздаем QR-код с новым размером
-  const urlParams = new URLSearchParams(window.location.search);
-  const artifactId = urlParams.get('artifactId') || 1;
-  generateQRCode(artifactId);
+  clearTimeout(resizeTimeout);
+  resizeTimeout = setTimeout(() => {
+    engine.resize();
+    configureCameraAndModel(camera, currentModel);
+    const urlParams = new URLSearchParams(window.location.search);
+    const artifactId = urlParams.get('artifactId') || 1;
+    generateQRCode(artifactId);
+  }, 200); // Задержка 200 мс
 });
 
 const urlParams = new URLSearchParams(window.location.search);
