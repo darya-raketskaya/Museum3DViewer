@@ -88,6 +88,15 @@ canvas {
   background: yellow !important;
 }
 
+#qrcode img {
+  display: block;
+  margin: 0 auto;
+  width: auto;
+  height: auto;
+  max-width: 90%;
+  max-height: 90%;
+}
+
 
 .qr-text {
   font-size: clamp(10px, 2.5vw, 12px);
@@ -256,7 +265,7 @@ function showError(message) {
 
 function generateQRCode(artifactId) {
   const qrContainer = document.getElementById('qrcode');
-  qrContainer.innerHTML = ''; // очищаем перед созданием
+  qrContainer.innerHTML = ''; // очищаем перед вставкой
 
   const baseUrl = `${window.location.origin}/pages/artifact.html`;
   const artifactUrl = `${baseUrl}?artifactId=${artifactId}`;
@@ -267,29 +276,32 @@ function generateQRCode(artifactId) {
   if (width <= 480) qrSize = 50;
   if (width <= 360) qrSize = 40;
 
+  // создаём QR-код как изображение
   new QRCode(qrContainer, {
     text: artifactUrl,
     width: qrSize,
     height: qrSize,
-    colorDark: '#000000',
-    colorLight: '#ffffff',
-    correctLevel: QRCode.CorrectLevel.H
+    correctLevel: QRCode.CorrectLevel.H,
+    render: 'image' // <-- ключевой момент
   });
 
-  // принудительно задаём размер canvas
+  // подставим ссылку на скачивание, если <img> уже отрендерен
   setTimeout(() => {
-    const qrCanvas = qrContainer.querySelector('canvas');
-    if (qrCanvas) {
-      qrCanvas.style.width = `${qrSize}px`;
-      qrCanvas.style.height = `${qrSize}px`;
-      qrCanvas.style.maxWidth = `${qrSize}px`;
-      qrCanvas.style.maxHeight = `${qrSize}px`;
+    const qrImg = qrContainer.querySelector('img');
+    if (qrImg) {
+      qrImg.style.maxWidth = `${qrSize}px`;
+      qrImg.style.maxHeight = `${qrSize}px`;
+      qrImg.style.width = `${qrSize}px`;
+      qrImg.style.height = `${qrSize}px`;
+      qrImg.style.display = 'block';
+      qrImg.style.margin = '0 auto';
 
       const downloadLink = document.getElementById('download-qr');
-      downloadLink.href = qrCanvas.toDataURL('image/png');
+      downloadLink.href = qrImg.src;
     }
-  }, 500);
+  }, 300);
 }
+
 
 
 const canvas = document.getElementById('renderCanvas');
